@@ -1,0 +1,16 @@
+{
+  "name": "shorturl",
+  "version": "1.0.0",
+  "description": "A simple Node.js backend with an HTML frontend url shortener web app.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
+  },
+  "author": "tonyliu.cloud",
+  "license": "MIT"
+}
