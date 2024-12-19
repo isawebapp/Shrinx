@@ -1,2 +1,0 @@
-# shorturl
-shorturl.isawebapp.com
