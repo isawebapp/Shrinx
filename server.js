@@ -5,15 +5,14 @@ const app = express();
 
 const TURNSTILE_SECRET_KEY = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
 
-let entries = []; // Store data in memory for simplicity
+let entries = [];
 
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve static files
+app.use(express.static('public'));
 
 app.post('/save', async (req, res) => {
     const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
 
-    // Verify Turnstile token
     try {
         const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
             params: {
@@ -29,7 +28,6 @@ app.post('/save', async (req, res) => {
         return res.status(500).send({ message: 'Error verifying Turnstile.' });
     }
 
-    // Validate subdomain
     const subdomainPattern = /^[a-z0-9-]+$/i;
     if (!subdomainPattern.test(subdomain)) {
         return res.status(400).send({ message: 'Invalid subdomain.' });
