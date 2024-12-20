@@ -1,4 +1,8 @@
 const form = document.getElementById('pathForm');
+const messageContainer = document.createElement('div');
+messageContainer.style.marginTop = '10px';
+messageContainer.style.color = 'red';
+form.appendChild(messageContainer);
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -15,10 +19,11 @@ form.addEventListener('submit', async (event) => {
 
     const result = await response.json();
     if (response.ok) {
-        alert(result.message);
-        loadEntries();
-        form.reset();
+        window.location.href = `/success.html?id=${result.data.id}&path=${result.data.path}&domain=${result.data.domain}&redirectUrl=${result.data.redirectUrl}`;
     } else {
-        alert(result.message);
+        messageContainer.textContent = result.message;
+        if (window.turnstile) {
+            turnstile.reset();
+        }
     }
 });

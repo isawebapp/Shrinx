@@ -3,32 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>path Manager</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        input, select, button { margin: 5px; padding: 8px; }
-        table { margin-top: 20px; border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    </style>
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="/css/style.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script type="text/javascript" src="/js/domains.js"></script>
 </head>
 <body>
-    <h1>path Manager</h1>
+    <h1>URL Shortener</h1>
     <form id="pathForm">
-        <label for="path">path:</label>
+        <label for="path">Path:</label>
         <input type="text" id="path" name="path" required>
         <label for="domain">Main Domain:</label>
-        <select id="domain" name="domain">
-        </select>
+        <select id="domain" name="domain"></select>
         <br>
         <label for="redirectUrl">Redirect URL:</label>
         <input type="url" id="redirectUrl" name="redirectUrl" required>
         <br>
+        <div id="responseMessage" style="margin-top: 10px; color: #d9534f;"></div>
         <button type="submit">Save</button>
         <br>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAAA2_YtoV8n1foFeC"></div>
-    </form>
+    </form>    
 </body>
 <script type="text/javascript" src="/js/save.js"></script>
 </html>
