@@ -31,12 +31,9 @@ app.use('/', express.static('public', {
 }));
 
 app.post('/save', async (req, res) => {
-    console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
-    const { domain_path, maindomain, redirectUrl, turnstileResponse } = req.body;
+    const { path, domain, redirectUrl, turnstileResponse } = req.body;
 
-    if (!turnstileResponse || !domain_path || !maindomain || !redirectUrl) {
-        console.log('Missing fields:', { domain_path, maindomain, redirectUrl, turnstileResponse });
+    if (!turnstileResponse || !path || !domain || !redirectUrl) {
         return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
     }
 
@@ -56,34 +53,28 @@ app.post('/save', async (req, res) => {
             }
         );        
 
-        console.log('Turnstile verification response:', response.data);
-
         if (response.data.success) {
             try {
                 const connection = await pool.getConnection();
                 const [result] = await connection.execute(
-                    `INSERT INTO domain_paths (domain_path, maindomain, redirect_url, last_edit_time)
+                    `INSERT INTO paths (path, domain, redirect_url, last_edit_time)
                      VALUES (?, ?, ?, NOW())`,
-                    [domain_path, maindomain, redirectUrl]
+                    [path, domain, redirectUrl]
                 );
                 connection.release();
             
-                console.log('Database operation successful:', result);
                 res.send({ 
                     message: 'Saved successfully.', 
-                    data: { id: result.insertId, domain_path, maindomain, redirectUrl } 
+                    data: { id: result.insertId, path, domain, redirectUrl } 
                 });
             } catch (dbError) {
-                console.error('Database error:', dbError);
                 res.status(500).send({ message: 'Database error.' });
             }
             
         } else {
-            console.log('Turnstile verification failed:', response.data);
             res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
         }
     } catch (turnstileError) {
-        console.error('Error verifying Turnstile token:', turnstileError);
         res.status(500).send({ message: 'Error verifying Turnstile token.' });
     }
 });

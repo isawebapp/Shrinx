@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>domain_path Manager</title>
+    <title>path Manager</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         input, select, button { margin: 5px; padding: 8px; }
@@ -13,12 +13,12 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    <h1>domain_path Manager</h1>
-    <form id="domain_pathForm">
-        <label for="domain_path">domain_path:</label>
-        <input type="text" id="domain_path" name="domain_path" required>
-        <label for="maindomain">Main Domain:</label>
-        <select id="maindomain" name="maindomain">
+    <h1>path Manager</h1>
+    <form id="pathForm">
+        <label for="path">path:</label>
+        <input type="text" id="path" name="path" required>
+        <label for="domain">Main Domain:</label>
+        <select id="domain" name="domain">
             <option value="example.com">example.com</option>
             <option value="mydomain.com">mydomain.com</option>
         </select>
@@ -32,19 +32,19 @@
     </form>
 
     <script>
-        const form = document.getElementById('domain_pathForm');
+        const form = document.getElementById('pathForm');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const domain_path = document.getElementById('domain_path').value;
-            const maindomain = document.getElementById('maindomain').value;
+            const path = document.getElementById('path').value;
+            const domain = document.getElementById('domain').value;
             const redirectUrl = document.getElementById('redirectUrl').value;
             const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
 
             const response = await fetch('/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ domain_path, maindomain, redirectUrl, turnstileResponse }),
+                body: JSON.stringify({ path, domain, redirectUrl, turnstileResponse }),
             });
 
             const result = await response.json();
