@@ -2,8 +2,9 @@ const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
-const app = express();
+const path = require('path');
 const cors = require('cors');
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 const pool = mysql.createPool({
@@ -26,15 +27,21 @@ app.use(cors({
 }));
 
 app.use('/', express.static('public', {
-    setHeaders: (res, path) => {
-        console.log(`Serving: ${path}`);
-    }
+    setHeaders: (res, path) => {}
 }));
 
+app.get('/error', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'error.html'));
+  });
+
+app.use(express.static(path.join(__dirname, "public")));
+
 app.post('/save', async (req, res) => {
+    console.log( req.body );
     const { path, domain, redirectUrl, turnstileResponse } = req.body;
 
     if (!turnstileResponse || !path || !domain || !redirectUrl) {
+        console.log({ message: 'Invalid request. Missing required fields.' });
         return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
     }
 
@@ -69,6 +76,7 @@ app.post('/save', async (req, res) => {
                     data: { id: result.insertId, path, domain, redirectUrl } 
                 });
             } catch (dbError) {
+                console.log({ message: 'Database error.' });
                 res.status(500).send({ message: 'Database error.' });
             }
             

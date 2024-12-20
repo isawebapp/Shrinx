@@ -11,6 +11,7 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     </style>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script type="text/javascript" src="/js/domains.js"></script>
 </head>
 <body>
     <h1>path Manager</h1>
@@ -19,8 +20,6 @@
         <input type="text" id="path" name="path" required>
         <label for="domain">Main Domain:</label>
         <select id="domain" name="domain">
-            <option value="example.com">example.com</option>
-            <option value="mydomain.com">mydomain.com</option>
         </select>
         <br>
         <label for="redirectUrl">Redirect URL:</label>
@@ -30,32 +29,6 @@
         <br>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAAA2_YtoV8n1foFeC"></div>
     </form>
-
-    <script>
-        const form = document.getElementById('pathForm');
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const path = document.getElementById('path').value;
-            const domain = document.getElementById('domain').value;
-            const redirectUrl = document.getElementById('redirectUrl').value;
-            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
-
-            const response = await fetch('/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path, domain, redirectUrl, turnstileResponse }),
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                alert(result.message);
-                loadEntries();
-                form.reset();
-            } else {
-                alert(result.message);
-            }
-        });
-    </script>
 </body>
+<script type="text/javascript" src="/js/save.js"></script>
 </html>
