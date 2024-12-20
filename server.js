@@ -34,9 +34,9 @@ app.post('/save', async (req, res) => {
     const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
     const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
 
-    if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
-        return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
-    }
+    //if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
+    //    return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
+    //}
 
     try {
         const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
