@@ -1,52 +1,87 @@
 const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mysql = require('mysql2/promise');
+
 const app = express();
 
-const TURNSTILE_SECRET_KEY = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
+const cors = require('cors');
+app.use(cors({
+    origin: 'https://shorturl.isawebapp.com',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-let entries = [];
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'shorturl',
+    password: 'CUjGj35Qe8wVYr1x3qSb',
+    database: 'shorturl',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+});
 
-app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/', express.static('public', {
+    setHeaders: (res, path) => {
+        console.log(`Serving: ${path}`);
+    }
+}));
 
 app.post('/save', async (req, res) => {
+    console.log('Body: ', req.body);
     const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
+    const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
+
+    if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
+        return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
+    }
 
     try {
-        const verificationResponse = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
+        const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
             params: {
-                secret: TURNSTILE_SECRET_KEY,
+                secret: secretKey,
                 response: turnstileResponse,
             },
         });
 
-        if (!verificationResponse.data.success) {
-            return res.status(400).send({ message: 'Turnstile verification failed.' });
+        console.log('Turnstile verification response:', response.data);
+
+        if (response.data.success) {
+            try {
+                const connection = await pool.getConnection();
+                const [result] = await connection.execute(
+                    `INSERT INTO subdomains (subdomain, maindomain, redirect_url, last_edit_time)
+                     VALUES (?, ?, ?, ?)`,
+                    [subdomain, maindomain, redirectUrl, new Date().toISOString()]
+                );
+                connection.release();
+
+                res.send({ message: 'Saved successfully.', data: { id: result.insertId, subdomain, maindomain, redirectUrl } });
+            } catch (error) {
+                console.error('Database error:', error);
+                res.status(500).send({ message: 'Database error.' });
+            }
+        } else {
+            res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
         }
     } catch (error) {
-        return res.status(500).send({ message: 'Error verifying Turnstile.' });
+        console.error('Error verifying Turnstile token:', error);
+        res.status(500).send({ message: 'Error verifying Turnstile token.' });
     }
-
-    const subdomainPattern = /^[a-z0-9-]+$/i;
-    if (!subdomainPattern.test(subdomain)) {
-        return res.status(400).send({ message: 'Invalid subdomain.' });
-    }
-
-    const newEntry = {
-        id: entries.length + 1,
-        subdomain,
-        maindomain,
-        redirectUrl,
-        lastEditTime: new Date().toISOString(),
-    };
-
-    entries.push(newEntry);
-    res.send({ message: 'Saved successfully.', data: newEntry });
 });
 
-app.get('/entries', (req, res) => {
-    res.send(entries);
+app.get('/entries', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const [rows] = await connection.execute(`SELECT * FROM subdomains ORDER BY id DESC`);
+        connection.release();
+        res.send(rows);
+    } catch (error) {
+        console.error('Database error:', error); // Log database errors
+        res.status(500).send({ message: 'Database error.' });
+    }
 });
 
 app.listen(3000, () => {
