@@ -1,16 +1,9 @@
-const axios = require('axios');
 const express = require('express');
+const axios = require('axios');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 const app = express();
-
-app.use(express.json());
 const cors = require('cors');
-app.use(cors({
-    origin: 'https://shorturl.isawebapp.com',
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
 
 const pool = mysql.createPool({
     host: 'localhost',
@@ -22,7 +15,15 @@ const pool = mysql.createPool({
     queueLimit: 0,
 });
 
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors({
+    origin: 'https://shorturl.isawebapp.com',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use('/', express.static('public', {
     setHeaders: (res, path) => {
         console.log(`Serving: ${path}`);
@@ -31,7 +32,7 @@ app.use('/', express.static('public', {
 
 app.post('/save', async (req, res) => {
     console.log('Headers:', req.headers);
-    console.log('Body:', req.body); // Log the body to see what's received
+    console.log('Body:', req.body);
     const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
 
     if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
@@ -42,12 +43,18 @@ app.post('/save', async (req, res) => {
     const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
 
     try {
-        const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
-            params: {
+        const response = await axios.post(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            {
                 secret: secretKey,
                 response: turnstileResponse,
             },
-        });
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );        
 
         console.log('Turnstile verification response:', response.data);
 
