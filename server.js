@@ -2,9 +2,9 @@ const axios = require('axios');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
+const app = express();
 
 app.use(express.json());
-
 const cors = require('cors');
 app.use(cors({
     origin: 'https://shorturl.isawebapp.com',
@@ -30,13 +30,16 @@ app.use('/', express.static('public', {
 }));
 
 app.post('/save', async (req, res) => {
-    console.log('Body: ', req.body);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body); // Log the body to see what's received
     const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
-    const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
 
-    //if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
-    //    return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
-    //}
+    if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
+        console.log('Missing fields:', { subdomain, maindomain, redirectUrl, turnstileResponse });
+        return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
+    }
+
+    const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
 
     try {
         const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
@@ -49,7 +52,6 @@ app.post('/save', async (req, res) => {
         console.log('Turnstile verification response:', response.data);
 
         if (response.data.success) {
-            // Do the logic
             try {
                 const connection = await pool.getConnection();
                 const [result] = await connection.execute(
@@ -59,16 +61,18 @@ app.post('/save', async (req, res) => {
                 );
                 connection.release();
 
+                console.log('Database operation successful:', result);
                 res.send({ message: 'Saved successfully.', data: { id: result.insertId, subdomain, maindomain, redirectUrl } });
-            } catch (error) {
-                console.error('Database error:', error);
+            } catch (dbError) {
+                console.error('Database error:', dbError);
                 res.status(500).send({ message: 'Database error.' });
             }
         } else {
+            console.log('Turnstile verification failed:', response.data);
             res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
         }
-    } catch (error) {
-        console.error('Error verifying Turnstile token:', error);
+    } catch (turnstileError) {
+        console.error('Error verifying Turnstile token:', turnstileError);
         res.status(500).send({ message: 'Error verifying Turnstile token.' });
     }
 });
