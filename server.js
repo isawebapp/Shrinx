@@ -63,17 +63,21 @@ app.post('/save', async (req, res) => {
                 const connection = await pool.getConnection();
                 const [result] = await connection.execute(
                     `INSERT INTO subdomains (subdomain, maindomain, redirect_url, last_edit_time)
-                     VALUES (?, ?, ?, ?)`,
-                    [subdomain, maindomain, redirectUrl, new Date().toISOString()]
+                     VALUES (?, ?, ?, NOW())`,
+                    [subdomain, maindomain, redirectUrl]
                 );
                 connection.release();
-
+            
                 console.log('Database operation successful:', result);
-                res.send({ message: 'Saved successfully.', data: { id: result.insertId, subdomain, maindomain, redirectUrl } });
+                res.send({ 
+                    message: 'Saved successfully.', 
+                    data: { id: result.insertId, subdomain, maindomain, redirectUrl } 
+                });
             } catch (dbError) {
                 console.error('Database error:', dbError);
                 res.status(500).send({ message: 'Database error.' });
             }
+            
         } else {
             console.log('Turnstile verification failed:', response.data);
             res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
