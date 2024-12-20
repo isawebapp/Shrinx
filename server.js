@@ -88,18 +88,6 @@ app.post('/save', async (req, res) => {
     }
 });
 
-app.get('/entries', async (req, res) => {
-    try {
-        const connection = await pool.getConnection();
-        const [rows] = await connection.execute(`SELECT * FROM subdomains ORDER BY id DESC`);
-        connection.release();
-        res.send(rows);
-    } catch (error) {
-        console.error('Database error:', error);
-        res.status(500).send({ message: 'Database error.' });
-    }
-});
-
 app.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
 });

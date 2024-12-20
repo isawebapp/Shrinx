@@ -30,22 +30,9 @@
         <br>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAAA2_YtoV8n1foFeC"></div>
     </form>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Subdomain</th>
-                <th>Main Domain</th>
-                <th>Redirect URL</th>
-                <th>Time Last Edit</th>
-            </tr>
-        </thead>
-        <tbody id="entriesTable"></tbody>
-    </table>
 
     <script>
         const form = document.getElementById('subdomainForm');
-        const table = document.getElementById('entriesTable');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -69,22 +56,6 @@
                 alert(result.message);
             }
         });
-
-        async function loadEntries() {
-            const response = await fetch('/entries');
-            const entries = await response.json();
-            table.innerHTML = entries.map(entry => `
-                <tr>
-                    <td>${entry.id}</td>
-                    <td>${entry.subdomain}</td>
-                    <td>${entry.maindomain}</td>
-                    <td>${entry.redirectUrl}</td>
-                    <td>${new Date(entry.lastEditTime).toLocaleString()}</td>
-                </tr>
-            `).join('');
-        }
-
-        loadEntries();
     </script>
 </body>
 </html>
