@@ -49,6 +49,7 @@ app.post('/save', async (req, res) => {
         console.log('Turnstile verification response:', response.data);
 
         if (response.data.success) {
+            // Do the logic
             try {
                 const connection = await pool.getConnection();
                 const [result] = await connection.execute(
@@ -79,7 +80,7 @@ app.get('/entries', async (req, res) => {
         connection.release();
         res.send(rows);
     } catch (error) {
-        console.error('Database error:', error); // Log database errors
+        console.error('Database error:', error);
         res.status(500).send({ message: 'Database error.' });
     }
 });
