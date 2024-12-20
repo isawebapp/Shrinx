@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdomain Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, select, button { margin: 5px; padding: 8px; }
+        table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+    <h1>Subdomain Manager</h1>
+    <form id="subdomainForm">
+        <label for="subdomain">Subdomain:</label>
+        <input type="text" id="subdomain" name="subdomain" required>
+        <label for="maindomain">Main Domain:</label>
+        <select id="maindomain" name="maindomain">
+            <option value="example.com">example.com</option>
+            <option value="mydomain.com">mydomain.com</option>
+        </select>
+        <br>
+        <label for="redirectUrl">Redirect URL:</label>
+        <input type="url" id="redirectUrl" name="redirectUrl" required>
+        <br>
+        <button type="submit">Save</button>
+        <br>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAA2_YtoV8n1foFeC"></div>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subdomain</th>
+                <th>Main Domain</th>
+                <th>Redirect URL</th>
+                <th>Time Last Edit</th>
+            </tr>
+        </thead>
+        <tbody id="entriesTable"></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('subdomainForm');
+        const table = document.getElementById('entriesTable');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const subdomain = document.getElementById('subdomain').value;
+            const maindomain = document.getElementById('maindomain').value;
+            const redirectUrl = document.getElementById('redirectUrl').value;
+            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
+
+            const response = await fetch('/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subdomain, maindomain, redirectUrl, turnstileResponse }),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                loadEntries();
+                form.reset();
+            } else {
+                alert(result.message);
+            }
+        });
+
+        async function loadEntries() {
+            const response = await fetch('/entries');
+            const entries = await response.json();
+            table.innerHTML = entries.map(entry => `
+                <tr>
+                    <td>${entry.id}</td>
+                    <td>${entry.subdomain}</td>
+                    <td>${entry.maindomain}</td>
+                    <td>${entry.redirectUrl}</td>
+                    <td>${new Date(entry.lastEditTime).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        loadEntries();
+    </script>
+</body>
+</html>
