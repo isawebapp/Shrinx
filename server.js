@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 const app = express();
 const cors = require('cors');
+const PORT = process.env.PORT || 3000;
 
 const pool = mysql.createPool({
     host: 'localhost',
@@ -79,6 +80,6 @@ app.post('/save', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server running at http://localhost:3000');
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });
