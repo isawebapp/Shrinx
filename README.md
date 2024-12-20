@@ -1,0 +1,1 @@
+This is a url shortener tool that create a short path with a short domain that redirects to the long url been entered.
