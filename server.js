@@ -33,10 +33,10 @@ app.use('/', express.static('public', {
 app.post('/save', async (req, res) => {
     console.log('Headers:', req.headers);
     console.log('Body:', req.body);
-    const { subdomain, maindomain, redirectUrl, turnstileResponse } = req.body;
+    const { domain_path, maindomain, redirectUrl, turnstileResponse } = req.body;
 
-    if (!turnstileResponse || !subdomain || !maindomain || !redirectUrl) {
-        console.log('Missing fields:', { subdomain, maindomain, redirectUrl, turnstileResponse });
+    if (!turnstileResponse || !domain_path || !maindomain || !redirectUrl) {
+        console.log('Missing fields:', { domain_path, maindomain, redirectUrl, turnstileResponse });
         return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
     }
 
@@ -62,16 +62,16 @@ app.post('/save', async (req, res) => {
             try {
                 const connection = await pool.getConnection();
                 const [result] = await connection.execute(
-                    `INSERT INTO subdomains (subdomain, maindomain, redirect_url, last_edit_time)
+                    `INSERT INTO domain_paths (domain_path, maindomain, redirect_url, last_edit_time)
                      VALUES (?, ?, ?, NOW())`,
-                    [subdomain, maindomain, redirectUrl]
+                    [domain_path, maindomain, redirectUrl]
                 );
                 connection.release();
             
                 console.log('Database operation successful:', result);
                 res.send({ 
                     message: 'Saved successfully.', 
-                    data: { id: result.insertId, subdomain, maindomain, redirectUrl } 
+                    data: { id: result.insertId, domain_path, maindomain, redirectUrl } 
                 });
             } catch (dbError) {
                 console.error('Database error:', dbError);

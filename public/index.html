@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subdomain Manager</title>
+    <title>domain_path Manager</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         input, select, button { margin: 5px; padding: 8px; }
@@ -13,10 +13,10 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    <h1>Subdomain Manager</h1>
-    <form id="subdomainForm">
-        <label for="subdomain">Subdomain:</label>
-        <input type="text" id="subdomain" name="subdomain" required>
+    <h1>domain_path Manager</h1>
+    <form id="domain_pathForm">
+        <label for="domain_path">domain_path:</label>
+        <input type="text" id="domain_path" name="domain_path" required>
         <label for="maindomain">Main Domain:</label>
         <select id="maindomain" name="maindomain">
             <option value="example.com">example.com</option>
@@ -32,11 +32,11 @@
     </form>
 
     <script>
-        const form = document.getElementById('subdomainForm');
+        const form = document.getElementById('domain_pathForm');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const subdomain = document.getElementById('subdomain').value;
+            const domain_path = document.getElementById('domain_path').value;
             const maindomain = document.getElementById('maindomain').value;
             const redirectUrl = document.getElementById('redirectUrl').value;
             const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
@@ -44,7 +44,7 @@
             const response = await fetch('/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subdomain, maindomain, redirectUrl, turnstileResponse }),
+                body: JSON.stringify({ domain_path, maindomain, redirectUrl, turnstileResponse }),
             });
 
             const result = await response.json();
