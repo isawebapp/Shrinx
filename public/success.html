@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Success</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
     <h1>Data Saved Successfully!</h1>
     <div id="info"></div>
@@ -18,11 +20,29 @@
         const params = new URLSearchParams(window.location.search);
         const infoDiv = document.getElementById('info');
         infoDiv.innerHTML = `
-            <p><strong>ID:</strong> ${params.get('id')}</p>
-            <p><strong>Path:</strong> ${params.get('path')}</p>
-            <p><strong>Domain:</strong> ${params.get('domain')}</p>
-            <p><strong>Redirect URL:</strong> ${params.get('redirectUrl')}</p>
+                    <p>
+                    <strong>Shortened URL:</strong> 
+                      <span id="shortenedUrl"> https://${params.get('domain')}/${params.get('path')}</span>
+                    </p>
+                    <p>
+                      <strong>Redirect URL:</strong> ${params.get('redirectUrl')}
+                    </p>
+                    <br>
+                    <button onclick="window.open('https://${params.get('domain')}/${params.get('path')}','_blank');" type="button">Open Link</button>
+                    <br>
+                    <button onclick="copyFunction('${params.get('domain')}/${params.get('path')}')">
+                      Copy Shortened URL
+                    </button>
         `;
     </script>
+    <script>
+        function copyFunction(shortenedUrl) {
+            navigator.clipboard.writeText(shortenedUrl).then(() => {
+            }).catch(err => {
+                console.error('Failed to copy URL:', err);
+            });
+        }
+    </script>
 </body>
+
 </html>

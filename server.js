@@ -37,7 +37,7 @@ app.get('/error', (req, res) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 app.post('/save', async (req, res) => {
-    console.log( req.body );
+    console.log(req.body);
     const { path, domain, redirectUrl, turnstileResponse } = req.body;
 
     if (!turnstileResponse || !path || !domain || !redirectUrl) {
@@ -59,31 +59,46 @@ app.post('/save', async (req, res) => {
                     'Content-Type': 'application/json',
                 },
             }
-        );        
+        );
 
         if (response.data.success) {
             try {
                 const connection = await pool.getConnection();
+
+                // Check for existing entry
+                const [existingEntry] = await connection.execute(
+                    `SELECT * FROM paths WHERE path = ? AND domain = ?`,
+                    [path, domain]
+                );
+
+                if (existingEntry.length > 0) {
+                    connection.release();
+                    return res.status(400).send({ 
+                        message: 'An entry with the same path and domain already exists.' 
+                    });
+                }
+
+                // Insert new entry
                 const [result] = await connection.execute(
                     `INSERT INTO paths (path, domain, redirect_url, last_edit_time)
                      VALUES (?, ?, ?, NOW())`,
                     [path, domain, redirectUrl]
                 );
                 connection.release();
-            
+
                 res.send({ 
                     message: 'Saved successfully.', 
                     data: { id: result.insertId, path, domain, redirectUrl } 
                 });
             } catch (dbError) {
-                console.log({ message: 'Database error.' });
+                console.log({ message: 'Database error.', error: dbError });
                 res.status(500).send({ message: 'Database error.' });
             }
-            
         } else {
             res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
         }
     } catch (turnstileError) {
+        console.log({ message: 'Error verifying Turnstile token.', error: turnstileError });
         res.status(500).send({ message: 'Error verifying Turnstile token.' });
     }
 });
