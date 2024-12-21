@@ -2,3 +2,5 @@ This is a url shortener tool that create a short path with a short domain that r
 
 [shorturl](https://github.com/isawebapp/shorturl): This is the main server handler all frontend and backend process.
 [shorturl-domain](https://github.com/isawebapp/shorturl-domains): Handlers just how shortened URL redirects.
+
+Developed by [tonyliu.cloud](https://tonyliu.cloud)
