@@ -20,11 +20,12 @@ const pool = mysql.createPool({
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cors({
-    origin: 'https://shorturl.isawebapp.com',
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+//Remove temporily
+// app.use(cors({
+//     origin: 'https://shorturl.isawebapp.com',
+//     methods: ['GET', 'POST'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
 
 app.use('/', express.static('public', {
     setHeaders: (res, path) => {}
