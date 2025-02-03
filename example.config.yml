@@ -2,15 +2,15 @@ database:
   path: "database.db"  # Path to the SQLite database file
 
 turnstile:
-  secret_key: "0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI"
+  secret_key: "secret_key"
+
+url: "localhost:5000"
 
 server:
   port: 5000
 
 domains:
-  - "short.isawebapp.com"
-
-url: "localhost:5000"
+  - "domain.com"
 
 admin:
   username: 'admin'       # Set your desired admin username

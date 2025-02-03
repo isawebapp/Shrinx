@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        input, button {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <h2>Manage Redirects</h2>
+
+    <form id="addForm">
+        <input type="text" id="path" placeholder="Path" required>
+        <input type="text" id="domain" placeholder="Domain" required>
+        <input type="text" id="redirectUrl" placeholder="Redirect URL" required>
+        <button type="submit">Add Redirect</button>
+    </form>
+
+    <h3>Current Redirects</h3>
+    <table id="redirectsTable">
+        <thead>
+            <tr>
+                <th>Path</th>
+                <th>Domain</th>
+                <th>Redirect URL</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Entries will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch existing redirects and populate the table
+        async function fetchRedirects() {
+            const response = await fetch('/admin/redirects');
+            const data = await response.json();
+            const tableBody = document.querySelector('#redirectsTable tbody');
+            tableBody.innerHTML = '';
+
+            data.redirects.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.path}</td>
+                    <td>${entry.domain}</td>
+                    <td>${entry.redirect_url}</td>
+                    <td>
+                        <button onclick="deleteRedirect(${entry.id})">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Handle adding a new redirect
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const path = document.getElementById('path').value;
+            const domain = document.getElementById('domain').value;
+            const redirectUrl = document.getElementById('redirectUrl').value;
+
+            const response = await fetch('/admin/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path, domain, redirectUrl })
+            });
+            if (response.ok) {
+                fetchRedirects(); // Refresh table
+            } else {
+                alert('Failed to add redirect');
+            }
+        });
+
+        // Handle deleting a redirect
+        async function deleteRedirect(id) {
+            const response = await fetch(`/admin/delete/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                fetchRedirects(); // Refresh table
+            } else {
+                alert('Failed to delete redirect');
+            }
+        }
+
+        // Initial fetch of redirects
+        fetchRedirects();
+    </script>
+</body>
+</html>

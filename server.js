@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
@@ -78,7 +79,7 @@ app.get('/error', (req, res) => {
 // Redirect handling route (from File 2)
 app.get('/:path', (req, res, next) => {
     const { path } = req.params;
-    const domain = req.hostname;
+    const domain = req.url;
 
     db.get(
         'SELECT redirect_url FROM paths WHERE path = ? AND domain = ?',
@@ -168,12 +169,97 @@ app.post('/save', async (req, res) => {
     }
 });
 
-// 404 handler for unmatched routes
+//404 handler for unmatched routes
 app.use((req, res) => {
     res.redirect(config.url + '/error'); // Redirect to error page URL from config.yml
 });
 
+// Use session for authentication
+app.use(session({
+    secret: 'your-secret-key',  // Change this to a secure key
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Admin login route
+app.post('/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    const adminUsername = config.admin.username;
+    const adminPassword = config.admin.password;
+
+    if (username === adminUsername && password === adminPassword) {
+        req.session.isAuthenticated = true;
+        res.redirect('/admin');
+    } else {
+        res.status(401).send('Invalid username or password');
+    }
+});
+
+// Admin authentication middleware
+const adminAuth = (req, res, next) => {
+    if (req.session.isAuthenticated) {
+        return next();
+    } else {
+        res.redirect('/login');
+    }
+};
+
+// Admin dashboard route (protected)
+app.get('/admin', adminAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Fetch all redirects
+app.get('/admin/redirects', adminAuth, (req, res) => {
+    db.all('SELECT * FROM paths', (err, rows) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.json({ redirects: rows });
+    });
+});
+
+// Add a new redirect
+app.post('/admin/add', adminAuth, (req, res) => {
+    const { path, domain, redirectUrl } = req.body;
+
+    if (!path || !domain || !redirectUrl) {
+        return res.status(400).send('Missing required fields');
+    }
+
+    const stmt = db.prepare(
+        'INSERT INTO paths (path, domain, redirect_url, last_edit_time) VALUES (?, ?, ?, datetime("now"))'
+    );
+
+    stmt.run([path, domain, redirectUrl], function (err) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Database error');
+        }
+        res.status(200).send({ message: 'Redirect added successfully' });
+    });
+});
+
+// Delete a redirect
+app.delete('/admin/delete/:id', adminAuth, (req, res) => {
+    const { id } = req.params;
+
+    db.run('DELETE FROM paths WHERE id = ?', [id], function (err) {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Database error');
+        }
+        res.status(200).send({ message: 'Redirect deleted successfully' });
+    });
+});
+
+
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server running at http://${config.server.hostname}:${PORT}`);
+    console.log(`Server running at http://${config.server.url}:${PORT}`);
 });
