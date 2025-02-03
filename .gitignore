@@ -1,4 +1,5 @@
 config.yml
+database.db
 # Logs
 logs
 *.log
