@@ -1,42 +1,104 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2/promise');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
-const app = express();
-const PORT = process.env.PORT || 3000;
+const yaml = require('js-yaml');
+const fs = require('fs');
 
-const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'shorturl',
-    password: 'CUjGj35Qe8wVYr1x3qSb',
-    database: 'shorturl',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
+// Load configuration from config.yml
+let config;
+try {
+    config = yaml.load(fs.readFileSync(path.join(__dirname, 'config.yml'), 'utf8'));
+} catch (e) {
+    console.error('Error loading config.yml:', e);
+    process.exit(1); // Exit if the config file cannot be loaded
+}
+
+const app = express();
+const PORT = config.server.port;
+
+// SQLite3 database connection (using the file path from config.yml)
+const db = new sqlite3.Database(config.database.path, (err) => {
+    if (err) {
+        console.error('Error opening SQLite database:', err);
+        process.exit(1);
+    }
 });
 
+// Database initialization
+const initDatabase = () => {
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS paths (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            path TEXT NOT NULL,
+            domain TEXT NOT NULL,
+            redirect_url TEXT NOT NULL,
+            last_edit_time TEXT NOT NULL
+        );
+    `;
+    
+    db.run(createTableQuery, (err) => {
+        if (err) {
+            console.error('Error initializing database:', err);
+        } else {
+            console.log('Database initialized successfully');
+        }
+    });
+};
+
+// Initialize the database when the app starts
+initDatabase();
+
+// Middleware setup
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//Remove temporily
-// app.use(cors({
-//     origin: 'https://shorturl.isawebapp.com',
-//     methods: ['GET', 'POST'],
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-// }));
-
+// Static file serving
 app.use('/', express.static('public', {
     setHeaders: (res, path) => {}
 }));
 
+// Serve domains from config.yml as JSON
+app.get('/api/domains', (req, res) => {
+    if (config.domains && Array.isArray(config.domains)) {
+        res.json({ domains: config.domains });
+    } else {
+        res.status(500).json({ error: 'Domains not found in config.yml' });
+    }
+});
+
+
+// Error page route
 app.get('/error', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'error.html'));
-  });
+});
 
-app.use(express.static(path.join(__dirname, "public")));
+// Redirect handling route (from File 2)
+app.get('/:path', (req, res, next) => {
+    const { path } = req.params;
+    const domain = req.hostname;
 
+    db.get(
+        'SELECT redirect_url FROM paths WHERE path = ? AND domain = ?',
+        [path, domain],
+        (err, row) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            if (row) {
+                return res.redirect(row.redirect_url);
+            } else {
+                return next();
+            }
+        }
+    );
+});
+
+// Save URL route (from File 1)
 app.post('/save', async (req, res) => {
     console.log(req.body);
     const { path, domain, redirectUrl, turnstileResponse } = req.body;
@@ -46,7 +108,7 @@ app.post('/save', async (req, res) => {
         return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
     }
 
-    const secretKey = '0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI';
+    const secretKey = config.turnstile.secret_key; // Using Turnstile secret key from config.yml
 
     try {
         const response = await axios.post(
@@ -63,38 +125,40 @@ app.post('/save', async (req, res) => {
         );
 
         if (response.data.success) {
-            try {
-                const connection = await pool.getConnection();
+            // Check for existing entry
+            db.get(
+                'SELECT * FROM paths WHERE path = ? AND domain = ?',
+                [path, domain],
+                (err, row) => {
+                    if (err) {
+                        console.error('Database error:', err);
+                        return res.status(500).send({ message: 'Database error.' });
+                    }
 
-                // Check for existing entry
-                const [existingEntry] = await connection.execute(
-                    `SELECT * FROM paths WHERE path = ? AND domain = ?`,
-                    [path, domain]
-                );
+                    if (row) {
+                        return res.status(400).send({ 
+                            message: 'An entry with the same path and domain already exists.' 
+                        });
+                    }
 
-                if (existingEntry.length > 0) {
-                    connection.release();
-                    return res.status(400).send({ 
-                        message: 'An entry with the same path and domain already exists.' 
+                    // Insert new entry
+                    const stmt = db.prepare(
+                        'INSERT INTO paths (path, domain, redirect_url, last_edit_time) VALUES (?, ?, ?, datetime("now"))'
+                    );
+
+                    stmt.run([path, domain, redirectUrl], function (err) {
+                        if (err) {
+                            console.error('Database error:', err);
+                            return res.status(500).send({ message: 'Database error.' });
+                        }
+
+                        res.send({ 
+                            message: 'Saved successfully.', 
+                            data: { id: this.lastID, path, domain, redirectUrl } 
+                        });
                     });
                 }
-
-                // Insert new entry
-                const [result] = await connection.execute(
-                    `INSERT INTO paths (path, domain, redirect_url, last_edit_time)
-                     VALUES (?, ?, ?, NOW())`,
-                    [path, domain, redirectUrl]
-                );
-                connection.release();
-
-                res.send({ 
-                    message: 'Saved successfully.', 
-                    data: { id: result.insertId, path, domain, redirectUrl } 
-                });
-            } catch (dbError) {
-                console.log({ message: 'Database error.', error: dbError });
-                res.status(500).send({ message: 'Database error.' });
-            }
+            );
         } else {
             res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
         }
@@ -104,6 +168,12 @@ app.post('/save', async (req, res) => {
     }
 });
 
+// 404 handler for unmatched routes
+app.use((req, res) => {
+    res.redirect(config.url + '/error'); // Redirect to error page URL from config.yml
+});
+
+// Start server
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://${config.server.hostname}:${PORT}`);
 });

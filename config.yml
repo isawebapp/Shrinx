@@ -1,0 +1,14 @@
+database:
+  path: "database.db"  # Path to the SQLite database file
+
+turnstile:
+  secret_key: "0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI"
+
+server:
+  port: 5000
+  hostname: "localhost"
+
+domains:
+  - "short.isawebapp.com"
+
+url: "https://shorturl.isawebapp.com"

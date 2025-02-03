@@ -1,4 +1,4 @@
-fetch('/domains.json')
+fetch('/api/domains')
     .then(response => response.json())
     .then(data => {
         const selectElement = document.getElementById('domain');
