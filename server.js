@@ -14,13 +14,13 @@ try {
     config = yaml.load(fs.readFileSync(path.join(__dirname, 'config.yml'), 'utf8'));
 } catch (e) {
     console.error('Error loading config.yml:', e);
-    process.exit(1); // Exit if the config file cannot be loaded
+    process.exit(1);
 }
 
 const app = express();
 const PORT = config.server.port;
 
-// SQLite3 database connection (using the file path from config.yml)
+// SQLite3 database connection
 const db = new sqlite3.Database(config.database.path, (err) => {
     if (err) {
         console.error('Error opening SQLite database:', err);
@@ -28,7 +28,7 @@ const db = new sqlite3.Database(config.database.path, (err) => {
     }
 });
 
-// Database initialization
+// Initialize the database
 const initDatabase = () => {
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS paths (
@@ -56,34 +56,46 @@ initDatabase();
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Static file serving
-app.use('/', express.static('public', {
-    setHeaders: (res, path) => {}
-}));
+// **Serve static files from `public/` directory**
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve domains from config.yml as JSON
-app.get('/api/domains', (req, res) => {
-    if (config.domains && Array.isArray(config.domains)) {
-        res.json({ domains: config.domains });
-    } else {
-        res.status(500).json({ error: 'Domains not found in config.yml' });
+// **Root Route - Serve index.html only for localhost**
+app.get('/', (req, res) => {
+    if (!["localhost", "127.0.0.1"].includes(req.hostname)) {
+        return res.status(403).send('Forbidden');
     }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// **Serve login page**
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
-// Error page route
+// **Serve domains as JSON (only for localhost)**
+app.get('/api/domains', (req, res) => {
+    if (!["localhost", "127.0.0.1"].includes(req.hostname)) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    res.json({ domains: config.domains });
+});
+
+// **Error page (only for localhost)**
 app.get('/error', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'error.html'));
 });
 
-// Redirect handling route (from File 2)
-app.get('/:path', (req, res, next) => {
+// **Updated Route: Redirect handling moved to `/url/:path`**
+app.get('/url/:path', (req, res, next) => {
+    if (!config.domains.includes(req.hostname)) {
+        return next(); // Ignore if not in allowed domains
+    }
+
     const { path } = req.params;
-    const domain = req.url;
 
     db.get(
         'SELECT redirect_url FROM paths WHERE path = ? AND domain = ?',
-        [path, domain],
+        [path.trim(), req.hostname],
         (err, row) => {
             if (err) {
                 console.error('Database error:', err);
@@ -91,7 +103,14 @@ app.get('/:path', (req, res, next) => {
             }
 
             if (row) {
-                return res.redirect(row.redirect_url);
+                let redirectUrl = row.redirect_url.trim(); // Trim whitespace and control characters
+                
+                // Ensure proper protocol handling
+                if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+                    redirectUrl = 'http://' + redirectUrl; // Default to HTTP if no protocol is specified
+                }
+
+                return res.redirect(redirectUrl);
             } else {
                 return next();
             }
@@ -99,95 +118,24 @@ app.get('/:path', (req, res, next) => {
     );
 });
 
-// Save URL route (from File 1)
-app.post('/save', async (req, res) => {
-    console.log(req.body);
-    const { path, domain, redirectUrl, turnstileResponse } = req.body;
-
-    if (!turnstileResponse || !path || !domain || !redirectUrl) {
-        console.log({ message: 'Invalid request. Missing required fields.' });
-        return res.status(400).send({ message: 'Invalid request. Missing required fields.' });
-    }
-
-    const secretKey = config.turnstile.secret_key; // Using Turnstile secret key from config.yml
-
-    try {
-        const response = await axios.post(
-            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-            {
-                secret: secretKey,
-                response: turnstileResponse,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        if (response.data.success) {
-            // Check for existing entry
-            db.get(
-                'SELECT * FROM paths WHERE path = ? AND domain = ?',
-                [path, domain],
-                (err, row) => {
-                    if (err) {
-                        console.error('Database error:', err);
-                        return res.status(500).send({ message: 'Database error.' });
-                    }
-
-                    if (row) {
-                        return res.status(400).send({ 
-                            message: 'An entry with the same path and domain already exists.' 
-                        });
-                    }
-
-                    // Insert new entry
-                    const stmt = db.prepare(
-                        'INSERT INTO paths (path, domain, redirect_url, last_edit_time) VALUES (?, ?, ?, datetime("now"))'
-                    );
-
-                    stmt.run([path, domain, redirectUrl], function (err) {
-                        if (err) {
-                            console.error('Database error:', err);
-                            return res.status(500).send({ message: 'Database error.' });
-                        }
-
-                        res.send({ 
-                            message: 'Saved successfully.', 
-                            data: { id: this.lastID, path, domain, redirectUrl } 
-                        });
-                    });
-                }
-            );
-        } else {
-            res.status(400).send({ message: 'Turnstile verification failed.', details: response.data });
-        }
-    } catch (turnstileError) {
-        console.log({ message: 'Error verifying Turnstile token.', error: turnstileError });
-        res.status(500).send({ message: 'Error verifying Turnstile token.' });
-    }
-});
-
-//404 handler for unmatched routes
-app.use((req, res) => {
-    res.redirect(config.url + '/error'); // Redirect to error page URL from config.yml
-});
-
-// Use session for authentication
+// **Authentication & Admin Routes (Only for localhost)**
 app.use(session({
-    secret: 'your-secret-key',  // Change this to a secure key
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: true
 }));
 
-// Admin login route
-app.post('/admin/login', (req, res) => {
-    const { username, password } = req.body;
-    const adminUsername = config.admin.username;
-    const adminPassword = config.admin.password;
+const adminAuth = (req, res, next) => {
+    if (req.session.isAuthenticated) return next();
+    res.redirect('/login');
+};
 
-    if (username === adminUsername && password === adminPassword) {
+// **Admin login POST route**
+app.post('/admin/login', (req, res) => {
+    if (!["localhost", "127.0.0.1"].includes(req.hostname)) return res.status(403).send('Forbidden');
+
+    const { username, password } = req.body;
+    if (username === config.admin.username && password === config.admin.password) {
         req.session.isAuthenticated = true;
         res.redirect('/admin');
     } else {
@@ -195,71 +143,52 @@ app.post('/admin/login', (req, res) => {
     }
 });
 
-// Admin authentication middleware
-const adminAuth = (req, res, next) => {
-    if (req.session.isAuthenticated) {
-        return next();
-    } else {
-        res.redirect('/login');
-    }
-};
-
-// Admin dashboard route (protected)
+// **Admin dashboard route**
 app.get('/admin', adminAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// Fetch all redirects
+// **Admin: Fetch all redirects**
 app.get('/admin/redirects', adminAuth, (req, res) => {
     db.all('SELECT * FROM paths', (err, rows) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).send('Internal Server Error');
-        }
+        if (err) return res.status(500).send('Internal Server Error');
         res.json({ redirects: rows });
     });
 });
 
-// Add a new redirect
+// **Admin: Add a new redirect**
 app.post('/admin/add', adminAuth, (req, res) => {
     const { path, domain, redirectUrl } = req.body;
-
-    if (!path || !domain || !redirectUrl) {
-        return res.status(400).send('Missing required fields');
-    }
+    if (!path || !domain || !redirectUrl) return res.status(400).send('Missing required fields');
 
     const stmt = db.prepare(
         'INSERT INTO paths (path, domain, redirect_url, last_edit_time) VALUES (?, ?, ?, datetime("now"))'
     );
 
     stmt.run([path, domain, redirectUrl], function (err) {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).send('Database error');
-        }
+        if (err) return res.status(500).send('Database error');
         res.status(200).send({ message: 'Redirect added successfully' });
     });
 });
 
-// Delete a redirect
+// **Admin: Delete a redirect**
 app.delete('/admin/delete/:id', adminAuth, (req, res) => {
-    const { id } = req.params;
-
-    db.run('DELETE FROM paths WHERE id = ?', [id], function (err) {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).send('Database error');
-        }
+    db.run('DELETE FROM paths WHERE id = ?', [req.params.id], function (err) {
+        if (err) return res.status(500).send('Database error');
         res.status(200).send({ message: 'Redirect deleted successfully' });
     });
 });
 
+// **404 Handler - Redirect to error page only for localhost**
+// app.use((req, res) => {
+//     if (["localhost", "127.0.0.1"].includes(req.hostname)) {
+//         res.redirect('/error');
+//     } else {
+//         res.status(404).send('Not Found');
+//     }
+// });
 
-// Start server
+// **Start server**
 app.listen(PORT, () => {
-    console.log(`Server running at http://${config.server.url}:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });

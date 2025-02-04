@@ -5,13 +5,12 @@ turnstile:
   secret_key: "0x4AAAAAAA2_Yq2QkGh8RQfVoBP_KJNPABI"
 
 server:
+  url: "localhost"
   port: 5000
 
 domains:
-  - "short.isawebapp.com"
-
-url: "localhost:5000"
+  - "localhost"
 
 admin:
   username: 'admin'       # Set your desired admin username
-  password: 'password'    # Set your desired admin password
+  password: 'admin'    # Set your desired admin password
