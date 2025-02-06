@@ -1,5 +1,46 @@
-This is a url shortener tool that create a short path with a short domain that redirects to the long url been entered.
+# 🔗 URL Shortener
 
-[shorturl](https://github.com/isawebapp/shorturl): This is the main server handler all frontend and backend process.
+A simple and efficient URL shortening tool that generates short links using a concise domain, redirecting users to their original long URLs.
 
-Developed by [tonyliu.cloud](https://tonyliu.cloud)
+## 📌 Features
+
+- Generate short URLs instantly  
+- Easy redirection to original links  
+- Simple and fast backend processing  
+- User-friendly and minimalistic design  
+
+## 🛠 Project Structure
+
+shorturl/ # Main server handling frontend and backend 
+├── backend/  # Backend logic and API 
+├── frontend/ # URL storage and management 
+├── config/   # Configuration files 
+└── README.md # Project documentation
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/)
+- [Express.js](https://expressjs.com/) (if using a Node backend)
+- Database (e.g., MongoDB, PostgreSQL, or SQLite)
+
+### Installation
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/yourusername/url-shortener.git
+   cd url-shortener
+   ```
+
+2. Install dependencies:
+
+  ```sh
+  npm install
+  ```
+
+3. Start the server:
+  ```sh
+  npm start
+  ```
+
+### Developed By
+[tonyliu.cloud](https://tonyliu.cloud)
