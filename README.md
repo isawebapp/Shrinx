@@ -21,8 +21,8 @@ shorturl/ # Main server handling frontend and backend
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/)
-- [Express.js](https://expressjs.com/) (if using a Node backend)
-- Database (e.g., MongoDB, PostgreSQL, or SQLite)
+- [Express.js](https://expressjs.com/) (Node backend)
+- Database (SQLite)
 
 ### Installation
 1. Clone the repository:
