@@ -27,7 +27,9 @@ shorturl/ # Main server handling frontend and backend
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/url-shortener.git
+   git clone https://github.com/isawebapp/shorturl.git
+   ```
+   ```sh
    cd url-shortener
    ```
 
