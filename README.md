@@ -11,7 +11,7 @@ A simple and efficient URL shortening tool that generates short links using a co
 
 ## 🛠 Project Structure
 
-shorturl/ # Main server handling frontend and backend 
+shorturl/ # Main server handling frontend and backend
 ├── backend/  # Backend logic and API 
 ├── frontend/ # URL storage and management 
 ├── config/   # Configuration files 
