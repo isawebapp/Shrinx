@@ -241,6 +241,11 @@ app.delete('/admin/delete/:id', adminAuth, (req, res) => {
     });
 });
 
+// **404 Handler - Redirect to error page only for localhost**
+app.use((req, res) => {
+    res.redirect('/error');
+});
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running at http://0.0.0.0:${PORT}`);

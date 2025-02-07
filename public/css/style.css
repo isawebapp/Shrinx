@@ -100,3 +100,61 @@ button {
     display: block;
     margin: 0 auto;
 }
+
+/* Container */
+.error-container {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 30px;
+    width: 300px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading */
+h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* Message */
+p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Button */
+a {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #222;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #222;
+    font-size: 14px;
+    text-transform: uppercase;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    background: #222;
+    color: #fff;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+footer a {
+    text-decoration: none;
+    color: #222;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
