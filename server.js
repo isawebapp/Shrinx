@@ -213,10 +213,14 @@ app.get('/admin', adminAuth, (req, res) => {
 // Admin: Fetch all redirects
 app.get('/admin/redirects', adminAuth, (req, res) => {
     db.all('SELECT * FROM paths', (err, rows) => {
-        if (err) return res.status(500).send('Internal Server Error');
+        if (err) {
+            console.error('Database Error:', err);
+            return res.status(500).json({ error: 'Internal Server Error', details: err.message });
+        }
         res.json({ redirects: rows });
     });
 });
+
 
 // Admin: Add a new redirect
 app.post('/admin/add', adminAuth, (req, res) => {
