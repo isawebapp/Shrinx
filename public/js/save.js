@@ -19,7 +19,7 @@ form.addEventListener('submit', async (event) => {
 
     const result = await response.json();
     if (response.ok) {
-        window.location.href = `/success.html?path=${result.data.path}&domain=${result.data.domain}&redirectUrl=${result.data.redirectUrl}`;
+        window.location.href = `/success?path=${result.data.path}&domain=${result.data.domain}&redirectUrl=${result.data.redirectUrl}`;
     } else {
         messageContainer.textContent = result.message;
         if (window.turnstile) {

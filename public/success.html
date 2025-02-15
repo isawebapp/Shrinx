@@ -22,15 +22,15 @@
         infoDiv.innerHTML = `
                     <p>
                     <strong>Shortened URL:</strong> 
-                      <span id="shortenedUrl"> https://${params.get('domain')}/${params.get('path')}</span>
+                      <span id="shortenedUrl"> https://${params.get('domain')}/url/${params.get('path')}</span>
                     </p>
                     <p>
                       <strong>Redirect URL:</strong> ${params.get('redirectUrl')}
                     </p>
                     <br>
-                    <button onclick="window.open('https://${params.get('domain')}/${params.get('path')}','_blank');" type="button">Open Link</button>
+                    <button onclick="window.open('https://${params.get('domain')}/url/${params.get('path')}','_blank');" type="button">Open Link</button>
                     <br>
-                    <button onclick="copyFunction('${params.get('domain')}/${params.get('path')}')">
+                    <button onclick="copyFunction('${params.get('domain')}/url/${params.get('path')}')">
                       Copy Shortened URL
                     </button>
         `;
@@ -44,5 +44,12 @@
         }
     </script>
 </body>
-
+<footer>
+    <hr>
+    <p>
+        <a href="https://github.com/isawebapp/shorturl" target="_blank">GitHub Repo</a> |
+        <a href="https://github.com/isawebapp/" target="_blank">GitHub Project</a> |
+        Developed by <a href="https://tonyliu.cloud" target="_blank">Tony Liu</a>
+    </p>
+</footer>
 </html>
