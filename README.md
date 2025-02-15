@@ -1,6 +1,6 @@
-# 🔗 LinkSnap
+# 🔗 Shrinx
 
-A **modern, minimalistic URL shortener** that transforms long, complex links into clean, concise URLs. **LinkSnap** is designed for simplicity, speed, and seamless integration.
+A **modern, minimalistic URL shortener** that transforms long, complex links into clean, concise URLs. **Shrinx** is designed for simplicity, speed, and seamless integration.
 
 ## 🚀 Features
 
@@ -8,7 +8,7 @@ A **modern, minimalistic URL shortener** that transforms long, complex links int
 - 📊 **Analytics**: Track click counts and link performance.
 - 🔒 **Secure**: Protect your data with encrypted storage.
 - 🔗 **Custom Short URLs**: Create custom alias links.
-- ⚡ **RESTful API**: Integrate LinkSnap with other applications.
+- ⚡ **RESTful API**: Integrate Shrinx with other applications.
 
 ## 🛠️ Tech Stack
 
@@ -25,7 +25,7 @@ A **modern, minimalistic URL shortener** that transforms long, complex links int
 ## 📂 Project Structure
 
 ```
-LinkSnap/
+Shrinx/
 │── backend/
 │   ├── controllers/      # API controllers
 │   ├── models/           # Database models
@@ -45,8 +45,8 @@ LinkSnap/
 
 ### 1️⃣ Clone the Repository
 ```sh
-git clone https://github.com/your-username/LinkSnap.git
-cd LinkSnap
+git clone https://github.com/your-username/Shrinx.git
+cd Shrinx
 ```
 
 ### 2️⃣ Backend Setup
@@ -83,4 +83,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ---
 
-🚀 **LinkSnap**: Shorten URLs, expand possibilities!
+🚀 **Shrinx**: Shorten URLs, expand possibilities!
