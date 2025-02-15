@@ -20,7 +20,6 @@ A **modern, minimalistic URL shortener** that transforms long, complex links int
 
 ### Frontend
 - **React.js**
-- **Tailwind CSS** for styling
 - **Axios** for API calls
 
 ## 📂 Project Structure
