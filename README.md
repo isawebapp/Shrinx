@@ -45,6 +45,8 @@ Shrinx/
 
 ### 🔹 How to Run?
 
+Test
+
 ```sh
 bash install-shrinx.sh
 ```
