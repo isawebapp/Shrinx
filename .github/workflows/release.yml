@@ -9,6 +9,8 @@ jobs:
   upload-release-asset:
     name: Upload install-shrinx.sh to Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
