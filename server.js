@@ -8,7 +8,6 @@ const cors = require('cors');
 const yaml = require('js-yaml');
 const fs = require('fs');
 
-// Load configuration from config.yml
 let config;
 try {
     config = yaml.load(fs.readFileSync(path.join(__dirname, 'config.yml'), 'utf8'));
@@ -20,7 +19,6 @@ try {
 const app = express();
 const PORT = config.server.port;
 
-// SQLite3 database connection
 const db = new sqlite3.Database(config.database.path, (err) => {
     if (err) {
         console.error('Error opening SQLite database:', err);
@@ -28,7 +26,6 @@ const db = new sqlite3.Database(config.database.path, (err) => {
     }
 });
 
-// Initialize the database
 const initDatabase = () => {
     const createTableQuery = `
         CREATE TABLE IF NOT EXISTS paths (
