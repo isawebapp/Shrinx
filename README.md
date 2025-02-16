@@ -45,8 +45,9 @@ Shrinx/
 
 ### 🔹 How to Run?
 
-Test
-
+```sh
+curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh | sudo bash
+```
 ```sh
 bash install-shrinx.sh
 ```
