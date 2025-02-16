@@ -41,7 +41,15 @@ Shrinx/
 │── README.md             # Project documentation
 ```
 
-## ⚙️ Installation & Setup
+## 📜 Auto Installation & Setup Script With PM2
+
+### 🔹 How to Run?
+
+```sh
+bash install-shrinx.sh
+```
+
+## ⚙️ Manual Installation & Setup
 
 ### 1️⃣ Clone the Repository
 ```sh
@@ -55,7 +63,28 @@ cd backend
 npm install
 npm start
 ```
-- Create a `.env` file with `PORT`, `DB_URI`, and `JWT_SECRET`.
+- Copy and clone example.config.yml.
+
+#### Example config:
+```
+database:
+  path: "database.db"  # Path to the SQLite database file
+
+turnstile:
+  secret_key: "secret_key"
+
+url: "localhost:5000"
+
+server:
+  port: 5000
+
+domains:
+  - "domain.com"
+
+admin:
+  username: 'admin'       # Set your desired admin username
+  password: 'password'    # Set your desired admin password
+```
 
 ### 3️⃣ Frontend Setup
 ```sh
