@@ -56,7 +56,7 @@ bash install-shrinx.sh
 
 ### 1️⃣ Clone the Repository
 ```sh
-git clone https://github.com/your-username/Shrinx.git
+git clone https://github.com/isawebapp/Shrinx.git
 cd Shrinx
 ```
 
