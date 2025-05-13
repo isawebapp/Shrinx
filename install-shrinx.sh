@@ -1,76 +1,77 @@
 #!/bin/bash
 
+set -e
+
 echo "🚀 Starting Shrinx Installation..."
 
-# Variables
-GIT_REPO="https://github.com/your-username/Shrinx.git"
+# --- Configuration ---
+GIT_REPO="https://github.com/isawebapp/Shrinx.git"
 INSTALL_DIR="$HOME/Shrinx"
 
-# Install necessary dependencies
-echo "📦 Installing dependencies..."
-sudo apt update && sudo apt install -y git curl nodejs npm sqlite3
+# --- 1) Install system dependencies ---
+echo "📦 Installing system dependencies..."
+sudo apt update
+sudo apt install -y git curl nodejs npm sqlite3
 
-# Install PM2 globally
+# --- 2) Install PM2 globally ---
+echo "📦 Installing PM2..."
 npm install -g pm2
 
-# Clone the repository
-echo "📂 Cloning Shrinx repository..."
-git clone $GIT_REPO $INSTALL_DIR
-cd $INSTALL_DIR || exit
+# --- 3) Clone (or update) the repo ---
+if [ -d "$INSTALL_DIR" ]; then
+  echo "📂 Repository already exists. Pulling latest changes..."
+  cd "$INSTALL_DIR"
+  git pull
+else
+  echo "📂 Cloning Shrinx repository..."
+  git clone "$GIT_REPO" "$INSTALL_DIR"
+  cd "$INSTALL_DIR"
+fi
 
-# Ask for user input
-read -p "🔑 Enter Turnstile Secret Key: " TURNSTILE_SECRET
-read -p "🌐 Enter the domain name (e.g., domain.com): " DOMAIN
-read -p "👤 Enter Admin Username: " ADMIN_USER
-read -s -p "🔒 Enter Admin Password: " ADMIN_PASS
+# --- 4) Prompt for environment variables ---
+echo "🔧 Configuring environment variables..."
+read -p "🔑 Cloudflare Turnstile site key: " SITE_KEY
+read -p "🔑 Cloudflare Turnstile secret key: " SECRET_KEY
+read -p "🌐 Allowed domains (comma-separated, e.g. localhost:3000,example.com): " DOMAINS
+read -p "👤 Admin username: " ADMIN_USER
+read -s -p "🔒 Admin password: " ADMIN_PASS
 echo ""
+read -s -p "🔐 Session password (min 32 characters): " SESSION_PASS
+echo ""
+read -p "🚪 Port to serve the app on (default 3000): " APP_PORT
+APP_PORT=${APP_PORT:-3000}
 
-# Backend Setup
-echo "⚙️ Setting up Backend..."
-cd backend || exit
-npm install
+cat > .env.local <<EOF
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=$SITE_KEY
+TURNSTILE_SECRET_KEY=$SECRET_KEY
 
-# Generate Config File
-cat <<EOF > config.yml
-database:
-  path: "database.db"
+ADMIN_USERNAME=$ADMIN_USER
+ADMIN_PASSWORD=$ADMIN_PASS
 
-turnstile:
-  secret_key: "$TURNSTILE_SECRET"
+SESSION_PASSWORD=$SESSION_PASS
 
-url: "localhost:5000"
-
-server:
-  port: 5000
-
-domains:
-  - "$DOMAIN"
-
-admin:
-  username: "$ADMIN_USER"
-  password: "$ADMIN_PASS"
+DOMAINS=$DOMAINS
+PORT=$APP_PORT
 EOF
 
-echo "✅ Configuration file created!"
+echo "✅ .env.local created"
 
-# Start backend with PM2
-pm2 start server.js --name "Shrinx-Backend"
+# --- 5) Install Node.js dependencies ---
+echo "📦 Installing project dependencies..."
+npm install
+
+# --- 6) Build the Next.js app ---
+echo "🏗  Building the app..."
+npm run build
+
+# --- 7) Start with PM2 ---
+echo "🚀 Starting Shrinx under PM2 on port $APP_PORT..."
+pm2 start npm --name "shrinx" -- start -- -p "$APP_PORT"
 pm2 save
 pm2 startup
 
-echo "🚀 Backend is now running with PM2!"
-
-# Frontend Setup
-echo "⚙️ Setting up Frontend..."
-cd ../frontend || exit
-npm install
-
-# Start frontend with PM2
-pm2 start "npm start" --name "Shrinx-Frontend" --cwd "$INSTALL_DIR/frontend"
-pm2 save
-
-echo "✅ Frontend is now running with PM2!"
-
-echo "🎉 Shrinx installation is complete!"
-echo "🔗 Access Frontend: http://localhost:3000/"
-echo "🔗 Access Backend: http://localhost:5000/"
+echo ""
+echo "🎉 Installation complete!"
+echo "🔗 Visit: http://localhost:$APP_PORT"
+echo "🛑 To view PM2 processes: pm2 list"
+echo "📄 To see logs: pm2 logs shrinx"
