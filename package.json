@@ -1,22 +1,32 @@
 {
-  "name": "shorturl",
-  "version": "1.0.0",
-  "description": "A simple Node.js backend with an HTML frontend url shortener web app.",
-  "main": "server.js",
+  "name": "shrinx",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "express-session": "^1.18.1",
-    "js-yaml": "^4.1.0",
-    "mysql2": "^3.11.5",
-    "path": "^0.12.7",
+    "@marsidev/react-turnstile": "^1.1.0",
+    "iron-session": "^8.0.4",
+    "next": "15.3.2",
+    "next-iron-session": "^4.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },
-  "author": "tonyliu.cloud",
-  "license": "MIT"
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
 }
