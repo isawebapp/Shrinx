@@ -1,14 +1,16 @@
+// src/pages/_document.js
+
 import { Html, Head, Main, NextScript } from "next/document";
+import Script from "next/script";
 
 export default function Document() {
   return (
     <Html>
       <Head>
-        <script
+        <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-          async
-          defer
-        ></script>
+          strategy="beforeInteractive"
+        />
       </Head>
       <body>
         <Main />

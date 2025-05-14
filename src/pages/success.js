@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 export default function Success() {
   const { query } = useRouter();
   const { path, domain } = query;
-  const shortUrl = `${domain}/${path}`;
+  const shortUrl = `${domain}/url/${path}`;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

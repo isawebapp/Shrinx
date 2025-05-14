@@ -1,8 +1,14 @@
 // src/pages/index.js
 
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Turnstile } from "@marsidev/react-turnstile";
+
+const Turnstile = dynamic(
+  () =>
+    import("@marsidev/react-turnstile").then((mod) => mod.Turnstile),
+  { ssr: false }
+);
 
 export default function Home() {
   const [domains, setDomains] = useState([]);
@@ -29,6 +35,7 @@ export default function Home() {
       return;
     }
     setSubmitting(true);
+
     try {
       const res = await fetch("/api/save", {
         method: "POST",
@@ -50,8 +57,9 @@ export default function Home() {
       }
     } catch {
       setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   return (
@@ -126,7 +134,8 @@ export default function Home() {
               <div className="flex justify-center">
                 <Turnstile
                   siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                  onVerify={(t) => setToken(t)}
+                  onSuccess={(t) => setToken(t)}
+                  onExpire={() => setToken("")}
                   onError={() =>
                     setError("Captcha failed, please try again.")
                   }
@@ -153,15 +162,25 @@ export default function Home() {
               Create with Next.js, TailWindCSS and SQLite3.
             </p>
             <p className="text-sm md:text-base">
-              A modern, minimalistic URL shortener that transforms long, complex links into clean, concise URLs. Shrinx is designed for simplicity, speed, and seamless integration.
+              A modern, minimalistic URL shortener that transforms long,
+              complex links into clean, concise URLs. Shrinx is designed for
+              simplicity, speed, and seamless integration.
             </p>
             <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
-              <a href="https://github.com/isawebapp/Shrinx" target="_blank" >
+              <a
+                href="https://github.com/isawebapp/Shrinx"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <button className="px-6 py-2 border border-white rounded hover:bg-white hover:text-blue-700 transition">
                   View Github Repository
                 </button>
               </a>
-              <a href="https://tonyliu.cloud" target="_blank" >
+              <a
+                href="https://tonyliu.cloud"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <button className="px-6 py-2 bg-white text-blue-700 rounded hover:bg-gray-100 transition">
                   by TonyLiu.cloud
                 </button>
