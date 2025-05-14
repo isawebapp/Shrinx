@@ -75,6 +75,8 @@ shrinx-next/
 
 ```sh
 curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh | sudo bash
+```
+```sh
 bash install-shrinx.sh
 ```
 
@@ -86,7 +88,11 @@ bash install-shrinx.sh
 
 ```bash
 git clone https://github.com/isawebapp/Shrinx.git
+```
+```bash
 cd Shrinx
+```
+```bash
 npm install
 ````
 
@@ -118,6 +124,8 @@ Your app will be available at `http://localhost:3000`.
 
 ```bash
 npm run build
+```
+```bash
 npm start
 ```
 
