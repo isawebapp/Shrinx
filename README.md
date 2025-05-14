@@ -73,9 +73,16 @@ shrinx-next/
 ---
 ## Run by script
 
-```sh
-curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh | sudo bash
+```bash
+curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh -o install-shrinx.sh
 ```
+```bash
+chmod +x install-shrinx.sh
+```
+```bash
+sudo ./install-shrinx.sh
+```
+
 
 ---
 
