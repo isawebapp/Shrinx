@@ -11,13 +11,31 @@ INSTALL_DIR="$HOME/Shrinx"
 # --- 1) Install system dependencies ---
 echo "📦 Installing system dependencies..."
 sudo apt update
-sudo apt install -y git curl nodejs npm sqlite3
+sudo apt install -y git curl sqlite3
 
-# --- 2) Install PM2 globally ---
+# --- 2) Ensure Node.js ≥18 is installed ---
+echo "🔍 Checking Node.js version..."
+if command -v node >/dev/null 2>&1; then
+  VERSION=$(node -v | sed 's/^v//')
+  MAJOR=${VERSION%%.*}
+  if [ "$MAJOR" -lt 18 ]; then
+    echo "⬇️ Node.js v$VERSION detected (<18). Installing Node.js 18..."
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt install -y nodejs
+  else
+    echo "✅ Node.js v$VERSION detected. Skipping installation."
+  fi
+else
+  echo "❗ Node.js not found. Installing Node.js 18..."
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  sudo apt install -y nodejs
+fi
+
+# --- 3) Install PM2 globally ---
 echo "📦 Installing PM2..."
 npm install -g pm2
 
-# --- 3) Clone (or update) the repo ---
+# --- 4) Clone (or update) the repo ---
 if [ -d "$INSTALL_DIR" ]; then
   echo "📂 Repository already exists. Pulling latest changes..."
   cd "$INSTALL_DIR"
@@ -28,7 +46,7 @@ else
   cd "$INSTALL_DIR"
 fi
 
-# --- 4) Prompt for environment variables ---
+# --- 5) Prompt for environment variables ---
 echo "🔧 Configuring environment variables..."
 read -p "🔑 Cloudflare Turnstile site key: " SITE_KEY
 read -p "🔑 Cloudflare Turnstile secret key: " SECRET_KEY
@@ -56,15 +74,15 @@ EOF
 
 echo "✅ .env.local created"
 
-# --- 5) Install Node.js dependencies ---
+# --- 6) Install Node.js dependencies ---
 echo "📦 Installing project dependencies..."
 npm install
 
-# --- 6) Build the Next.js app ---
+# --- 7) Build the Next.js app ---
 echo "🏗  Building the app..."
 npm run build
 
-# --- 7) Start with PM2 ---
+# --- 8) Start with PM2 ---
 echo "🚀 Starting Shrinx under PM2 on port $APP_PORT..."
 pm2 start npm --name "shrinx" -- start -- -p "$APP_PORT"
 pm2 save
