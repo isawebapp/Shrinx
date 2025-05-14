@@ -104,6 +104,10 @@ npm install
 
 Rename `example.env.local` to `.env.local` in the project root:
 
+```bash
+mv example.env.local .env.local
+```
+
 ```ini
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_turnstile_secret_key
