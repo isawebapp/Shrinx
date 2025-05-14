@@ -17,6 +17,11 @@ A **modern, minimalistic URL shortener** that transforms long, complex links int
 - ⚙️ **API-First**  
   RESTful API under `/api/` for integrations or automation.
 
+### Test
+```
+shrinx.isawebapp.com/url/test
+```
+
 ---
 
 ## 🛠️ Tech Stack
