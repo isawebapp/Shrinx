@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const Turnstile = dynamic(
   () =>
@@ -10,19 +10,12 @@ const Turnstile = dynamic(
   { ssr: false }
 );
 
-export default function Home() {
-  const [domains, setDomains] = useState([]);
+export default function Home({ domains: initialDomains }) {
+  const [domains] = useState(initialDomains);
   const [form, setForm] = useState({ url: "", domain: "", alias: "" });
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/domains")
-      .then((r) => r.json())
-      .then((data) => setDomains(data.domains || []))
-      .catch(() => setError("Could not load domains"));
-  }, []);
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -198,4 +191,13 @@ export default function Home() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps() {
+  const domains = process.env.DOMAINS?.split(",") || [];
+  return {
+    props: {
+      domains,
+    },
+  };
 }

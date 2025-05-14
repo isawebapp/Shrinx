@@ -1,3 +1,5 @@
+// src/pages/error.js
+
 export default function ErrorPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -13,4 +15,10 @@ export default function ErrorPage() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  return {
+    props: {}
+  };
 }

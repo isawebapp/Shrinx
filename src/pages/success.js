@@ -1,8 +1,6 @@
-import { useRouter } from "next/router";
+// src/pages/success.js
 
-export default function Success() {
-  const { query } = useRouter();
-  const { path, domain } = query;
+export default function Success({ path, domain }) {
   const shortUrl = `${domain}/url/${path}`;
 
   return (
@@ -21,4 +19,14 @@ export default function Success() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps({ query }) {
+  const { path = "", domain = "" } = query;
+  return {
+    props: {
+      path,
+      domain,
+    },
+  };
 }

@@ -1,8 +1,9 @@
 // src/pages/admin.js
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { withSessionSsr } from "../lib/session";
+import { openDB } from "../lib/db";
 
 export const getServerSideProps = withSessionSsr(async ({ req }) => {
   const user = req.session.get("user");
@@ -14,34 +15,31 @@ export const getServerSideProps = withSessionSsr(async ({ req }) => {
       },
     };
   }
-  return { props: {} };
+
+  const db = await openDB();
+  await db.run(`
+    CREATE TABLE IF NOT EXISTS paths (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      path TEXT,
+      domain TEXT,
+      redirect_url TEXT
+    )
+  `);
+  const initialRedirects = await db.all("SELECT * FROM paths");
+
+  return {
+    props: { initialRedirects },
+  };
 });
 
-export default function Admin() {
+export default function Admin({ initialRedirects }) {
   const router = useRouter();
-  const [list, setList] = useState([]);
+  const [list, setList] = useState(initialRedirects);
   const [form, setForm] = useState({
     path: "",
     domain: "",
     redirectUrl: "",
   });
-
-  useEffect(() => {
-    async function loadRedirects() {
-      try {
-        const res = await fetch("/api/admin/redirects");
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        const json = await res.json();
-        const redirects = Array.isArray(json)
-          ? json
-          : json.redirects ?? json.rows ?? [];
-        setList(redirects);
-      } catch (err) {
-        console.error("Failed to load redirects:", err);
-      }
-    }
-    loadRedirects();
-  }, []);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -64,7 +62,7 @@ export default function Admin() {
       setList(updatedList);
       setForm({ path: "", domain: "", redirectUrl: "" });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to add redirect:", err);
     }
   };
 
@@ -76,7 +74,7 @@ export default function Admin() {
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       setList((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
-      console.error(err);
+      console.error("Failed to delete redirect:", err);
     }
   };
 
@@ -85,7 +83,7 @@ export default function Admin() {
     if (res.ok) {
       router.push("/login");
     } else {
-      console.error("Logout failed", await res.text());
+      console.error("Logout failed:", await res.text());
     }
   };
 
