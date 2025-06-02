@@ -1,5 +1,3 @@
-// src/pages/admin.js
-
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { withSessionSsr } from "../lib/session";

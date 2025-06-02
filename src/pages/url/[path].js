@@ -1,5 +1,3 @@
-// src/pages/url/[path].js
-
 import { openDB } from "../../lib/db";
 
 export async function getServerSideProps({ params, req }) {

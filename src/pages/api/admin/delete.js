@@ -1,5 +1,3 @@
-// src/pages/api/admin/delete.js
-
 import { withSessionRoute } from "../../../lib/session";
 import { openDB } from "../../../lib/db";
 

@@ -1,5 +1,3 @@
-// src/pages/api/save.js
-
 import axios from "axios";
 import { openDB } from "../../lib/db";
 

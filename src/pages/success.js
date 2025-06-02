@@ -1,5 +1,3 @@
-// src/pages/success.js
-
 export default function Success({ path, domain }) {
   const shortUrl = `${domain}/url/${path}`;
 

@@ -1,5 +1,3 @@
-// src/pages/index.js
-
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -154,6 +152,9 @@ export default function Home({ domains: initialDomains }) {
             <p className="text-base md:text-lg">
               Create with Next.js, TailWindCSS and SQLite3.
             </p>
+            <p className="text-base md:text-lg">
+              A project from <i>Is A Web App</i>
+            </p>
             <p className="text-sm md:text-base">
               A modern, minimalistic URL shortener that transforms long,
               complex links into clean, concise URLs. Shrinx is designed for
@@ -166,16 +167,16 @@ export default function Home({ domains: initialDomains }) {
                 rel="noopener noreferrer"
               >
                 <button className="px-6 py-2 border border-white rounded hover:bg-white hover:text-blue-700 transition">
-                  View Github Repository
+                  Github Repository
                 </button>
               </a>
               <a
-                href="https://tonyliu.cloud"
+                href="https://tony-liu.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <button className="px-6 py-2 bg-white text-blue-700 rounded hover:bg-gray-100 transition">
-                  by TonyLiu.cloud
+                  Powered by tony-liu.com
                 </button>
               </a>
             </div>

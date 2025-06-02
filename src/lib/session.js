@@ -1,4 +1,3 @@
-// src/lib/session.js
 import { withIronSession } from "next-iron-session";
 
 const sessionOptions = {

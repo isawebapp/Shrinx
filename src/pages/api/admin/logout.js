@@ -1,5 +1,3 @@
-// src/pages/api/admin/logout.js
-
 import { withSessionRoute } from "../../../lib/session";
 
 export default withSessionRoute(async (req, res) => {
