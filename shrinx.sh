@@ -28,21 +28,28 @@ install_shrinx() {
   sudo apt update
   sudo apt install -y git curl sqlite3 build-essential
 
-  # 2. Node.js
+  # 2. Node.js: Must be at least v18, but install 22 if not installed at all
   echo "🔍 Checking Node.js version..."
   if command -v node >/dev/null 2>&1; then
     VERSION=$(node -v | sed 's/^v//')
     MAJOR=${VERSION%%.*}
     if [ "$MAJOR" -lt 18 ]; then
-      echo "⬇️ Node.js v$VERSION detected (<18). Installing Node.js 18..."
-      curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-      sudo apt install -y nodejs
+      echo "❌ Node.js v$VERSION detected (<18)."
+      read -p "Do you want to install Node.js 22? (y/n): " INSTALL_22
+      if [[ "$INSTALL_22" =~ ^[Yy]$ ]]; then
+        echo "⬇️ Installing Node.js 22..."
+        curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+        sudo apt install -y nodejs
+      else
+        echo "❌ Installation requires Node.js >=18. Exiting."
+        exit 1
+      fi
     else
       echo "✅ Node.js v$VERSION detected. Skipping installation."
     fi
   else
-    echo "❗ Node.js not found. Installing Node.js 18..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    echo "❗ Node.js not found. Installing Node.js 22..."
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
     sudo apt install -y nodejs
   fi
 
