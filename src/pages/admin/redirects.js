@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { withSessionSsr } from "../../lib/session";
 import { openDB } from "../../lib/db";
 
@@ -52,12 +53,12 @@ export default function RedirectsPage({ initialRedirects }) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-semibold">Redirect Manager</h1>
-          <a 
+          <Link 
             href="/admin" 
             className="text-blue-600 hover:underline mt-2 inline-block"
           >
             &larr; Back to Dashboard
-          </a>
+          </Link>
         </div>
         <button
           onClick={handleLogout}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { withSessionSsr } from "../lib/session";
 import { openDB } from "../lib/db";
 
@@ -121,12 +122,12 @@ export default function Admin() {
       </form>
 
       <div className="bg-white p-6 shadow rounded">
-        <a 
+        <Link 
           href="/admin/redirects" 
           className="text-blue-600 hover:underline text-lg font-medium"
         >
           View All Redirects →
-        </a>
+        </Link>
       </div>
     </div>
   );
