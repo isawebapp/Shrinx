@@ -75,7 +75,7 @@ shrinx-next/
 ````
 
 ---
-## Run by script
+## Run by script (One Click Install)
 
 ```bash
 curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh -o install-shrinx.sh && chmod +x install-shrinx.sh && bash install-shrinx.sh
