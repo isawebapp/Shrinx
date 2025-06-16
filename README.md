@@ -78,17 +78,8 @@ shrinx-next/
 ## Run by script
 
 ```bash
-curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh -o install-shrinx.sh
+curl -sSL https://github.com/isawebapp/Shrinx/releases/latest/download/install-shrinx.sh -o install-shrinx.sh && chmod +x install-shrinx.sh && bash install-shrinx.sh
 ```
-```bash
-chmod +x install-shrinx.sh
-```
-```bash
-sudo ./install-shrinx.sh
-```
-
-
----
 
 ## ⚙️ Getting Started (Run by manual setup)
 
