@@ -5,13 +5,13 @@ set -e
 echo "🚀 Starting Shrinx Installation..."
 
 # --- Configuration ---
-GIT_REPO="https://github.com/isawebapp/Shrinx.git"
-INSTALL_DIR="$HOME/Shrinx"
+GIT_REPO="https://github.com/isawebapp/shorturl.git"
+INSTALL_DIR="$HOME/shrinx"
 
 # --- 1) Install system dependencies ---
 echo "📦 Installing system dependencies..."
 sudo apt update
-sudo apt install -y git curl sqlite3
+sudo apt install -y git curl sqlite3 build-essential
 
 # --- 2) Ensure Node.js ≥18 is installed ---
 echo "🔍 Checking Node.js version..."
@@ -46,7 +46,11 @@ else
   cd "$INSTALL_DIR"
 fi
 
-# --- 5) Prompt for environment variables ---
+# --- 5) Install TypeScript globally for build process ---
+echo "📦 Installing TypeScript..."
+npm install -g typescript
+
+# --- 6) Prompt for environment variables ---
 echo "🔧 Configuring environment variables..."
 read -p "🔑 Cloudflare Turnstile site key: " SITE_KEY
 read -p "🔑 Cloudflare Turnstile secret key: " SECRET_KEY
@@ -56,6 +60,11 @@ read -s -p "🔒 Admin password: " ADMIN_PASS
 echo ""
 read -s -p "🔐 Session password (min 32 characters): " SESSION_PASS
 echo ""
+while [ ${#SESSION_PASS} -lt 32 ]; do
+  echo "❌ Session password must be at least 32 characters"
+  read -s -p "🔐 Please enter a session password (min 32 characters): " SESSION_PASS
+  echo ""
+done
 read -p "🚪 Port to serve the app on (default 3000): " APP_PORT
 APP_PORT=${APP_PORT:-3000}
 
@@ -74,17 +83,17 @@ EOF
 
 echo "✅ .env.local created"
 
-# --- 6) Install Node.js dependencies ---
+# --- 7) Install project dependencies ---
 echo "📦 Installing project dependencies..."
 npm install
 
-# --- 7) Build the Next.js app ---
+# --- 8) Build the Next.js app ---
 echo "🏗  Building the app..."
 npm run build
 
-# --- 8) Start with PM2 ---
+# --- 9) Start with PM2 ---
 echo "🚀 Starting Shrinx under PM2 on port $APP_PORT..."
-pm2 start npm --name "shrinx" -- start -- -p "$APP_PORT"
+pm2 start "npm run start -- -p $APP_PORT" --name "shrinx"
 pm2 save
 pm2 startup
 
