@@ -5,7 +5,7 @@ set -e
 echo "🚀 Starting Shrinx Installation..."
 
 # --- Configuration ---
-GIT_REPO="https://github.com/isawebapp/shorturl.git"
+GIT_REPO="https://github.com/isawebapp/shrinx.git"
 INSTALL_DIR="$HOME/shrinx"
 
 # --- 1) Install system dependencies ---
