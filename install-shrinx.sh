@@ -37,9 +37,18 @@ npm install -g pm2
 
 # --- 4) Clone (or update) the repo ---
 if [ -d "$INSTALL_DIR" ]; then
-  echo "📂 Repository already exists. Pulling latest changes..."
-  cd "$INSTALL_DIR"
-  git pull
+  # Check if the directory is a git repository
+  if [ -d "$INSTALL_DIR/.git" ]; then
+    echo "📂 Repository already exists. Pulling latest changes..."
+    cd "$INSTALL_DIR"
+    git pull
+  else
+    echo "⚠️ Directory exists but is not a git repository. Removing and cloning fresh..."
+    rm -rf "$INSTALL_DIR"
+    echo "📂 Cloning Shrinx repository..."
+    git clone "$GIT_REPO" "$INSTALL_DIR"
+    cd "$INSTALL_DIR"
+  fi
 else
   echo "📂 Cloning Shrinx repository..."
   git clone "$GIT_REPO" "$INSTALL_DIR"
