@@ -18,7 +18,7 @@ A **modern, minimalistic URL shortener** that transforms long, complex links int
   RESTful API under `/api/` for integrations or automation.
 
 ### Test
-[shrinx.isawebapp.com/url/test](https://shrinx.isawebapp.com/url/test)
+[123415.xyz/url/test](https://123415.xyz/url/test)
 
 
 ---
