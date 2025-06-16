@@ -23,21 +23,17 @@ export const getServerSideProps = withSessionSsr(async ({ req }) => {
       redirect_url TEXT
     )
   `);
-  const initialRedirects = await db.all("SELECT * FROM paths");
-
-  return {
-    props: { initialRedirects },
-  };
+  return { props: {} };
 });
 
-export default function Admin({ initialRedirects }) {
+export default function Admin() {
   const router = useRouter();
-  const [list, setList] = useState(initialRedirects);
   const [form, setForm] = useState({
     path: "",
     domain: "",
     redirectUrl: "",
   });
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -51,28 +47,12 @@ export default function Admin({ initialRedirects }) {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error(`Add failed: ${res.status}`);
-
-      const updatedRes = await fetch("/api/admin/redirects");
-      const updatedJson = await updatedRes.json();
-      const updatedList = Array.isArray(updatedJson)
-        ? updatedJson
-        : updatedJson.redirects ?? updatedJson.rows ?? [];
-      setList(updatedList);
+      
+      setSuccess(true);
       setForm({ path: "", domain: "", redirectUrl: "" });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error("Failed to add redirect:", err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      const res = await fetch(`/api/admin/delete?id=${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
-      setList((prev) => prev.filter((r) => r.id !== id));
-    } catch (err) {
-      console.error("Failed to delete redirect:", err);
     }
   };
 
@@ -99,6 +79,12 @@ export default function Admin({ initialRedirects }) {
 
       <form onSubmit={handleAdd} className="bg-white p-6 mb-8 shadow rounded">
         <h2 className="text-xl font-medium mb-4">Add Redirect</h2>
+        
+        {success && (
+          <div className="bg-green-100 text-green-700 p-4 mb-4 rounded">
+            Redirect added successfully!
+          </div>
+        )}
 
         <label className="block text-sm font-semibold mb-1">Path</label>
         <input
@@ -134,41 +120,13 @@ export default function Admin({ initialRedirects }) {
         </button>
       </form>
 
-      <div className="overflow-x-auto bg-white shadow rounded">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 text-left">Path</th>
-              <th className="p-2 text-left">Domain</th>
-              <th className="p-2 text-left">Redirect URL</th>
-              <th className="p-2 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((r) => (
-              <tr key={r.id} className="border-t">
-                <td className="p-2">{r.path}</td>
-                <td className="p-2">{r.domain}</td>
-                <td className="p-2 break-all">{r.redirect_url}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleDelete(r.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {list.length === 0 && (
-              <tr>
-                <td colSpan="4" className="p-4 text-center text-gray-500">
-                  No redirects defined yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="bg-white p-6 shadow rounded">
+        <a 
+          href="/admin/redirects" 
+          className="text-blue-600 hover:underline text-lg font-medium"
+        >
+          View All Redirects →
+        </a>
       </div>
     </div>
   );
